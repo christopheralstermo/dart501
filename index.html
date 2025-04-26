@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Darts Score</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+        tr, th, td {
+            font-size: 5vw;
+            text-align: center;
+            height: 10vw;
+            width: 15vw;
+            border: 1px solid black;
+        }
+        .single {
+            background-color: black;
+            color: white;
+        }
+        .double {
+            background-color: green;
+            color: white;
+        }
+        .triple {
+            background-color: red;
+            color: white;
+        }
+        .bullseye-50 {
+            background-color: green;
+            color: white;
+        }
+        .bullseye-100 {
+            background-color: red;
+            color: white;
+        }
+        .miss-0 {
+            background-color: black;
+            color: white;
+        }
+        .clicked {
+            filter: brightness(70%);
+        }
+        .confirmation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 4vw;
+            border: 2px solid black;
+            max-width: 80vw;
+            box-sizing: border-box;
+        }
+        button {
+            font-size: 4vw;
+            margin: 2vw;
+            padding: 2vw 4vw;
+            border-radius: 5px;
+            touch-action: manipulation;
+        }
+        hr {
+            border: 1px solid black;
+            margin: 1vw 0;
+            width: 80%;
+        }
+        .total {
+            font-weight: bold;
+            margin-top: 2vw;
+            font-size: 4.5vw;
+        }
+        .score-entry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1vw 0;
+        }
+        .delete-btn {
+            font-size: 3vw;
+            margin-left: 2vw;
+            padding: 1vw 2vw;
+            cursor: pointer;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .save-game-btn {
+            font-size: 4vw;
+            margin: 4vw auto;
+            padding: 2vw 4vw;
+            display: block;
+            background-color: #ffd700;
+            border: 2px solid #b8860b;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .continue-game-btn {
+            font-size: 3vw;
+            margin-left: 2vw;
+            padding: 1vw 2vw;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .winning-board {
+            margin-top: 4vw;
+            padding: 2vw;
+            border: 2px solid #ccc;
+        }
+        .winner {
+            background: linear-gradient(45deg, #ffd700, #ffec8b);
+            border: 3px solid #b8860b;
+            padding: 2vw;
+            margin: 1vw;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ffd700;
+            position: relative;
+            overflow: hidden;
+            font-size: 4vw;
+        }
+        .winner::before {
+            content: '✨';
+            position: absolute;
+            font-size: 8vw;
+            top: -2vw;
+            left: -2vw;
+            animation: sparkle 2s infinite;
+        }
+        .winner::after {
+            content: '✨';
+            position: absolute;
+            font-size: 8vw;
+            bottom: -2vw;
+            right: -2vw;
+            animation: sparkle 2s infinite 1s;
+        }
+        @keyframes sparkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .loser {
+            background: linear-gradient(45deg, #556b2f, #8b8b83);
+            border: 3px solid #3c2f2f;
+            padding: 2vw;
+            margin: 1vw;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #556b2f;
+            position: relative;
+            color: #d3d3d3;
+            font-size: 4vw;
+        }
+        .loser::before {
+            content: '💦';
+            position: absolute;
+            font-size: 5vw;
+            top: 0;
+            left: 0;
+            animation: drip 3s infinite;
+        }
+        @keyframes drip {
+            0% { transform: translateY(-2vw); opacity: 0; }
+            50% { transform: translateY(4vw); opacity: 1; }
+            100% { transform: translateY(10vw); opacity: 0; }
+        }
+        .game-entry {
+            margin-bottom: 2vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .player-management {
+            margin: 4vw 0;
+            padding: 2vw;
+            border: 1px solid #ccc;
+        }
+        .player-management input {
+            font-size: 4vw;
+            padding: 1vw;
+            margin: 1vw;
+            width: 30vw;
+        }
+        .player-management button {
+            font-size: 3.5vw;
+            padding: 1.5vw 3vw;
+        }
+        .player-entry {
+            display: flex;
+            align-items: center;
+            margin: 1vw 0;
+        }
+        .rules-page {
+            margin: 4vw;
+            padding: 2vw;
+            border: 2px solid #ccc;
+            font-size: 4vw;
+        }
+        .rules-page ul {
+            padding-left: 6vw;
+        }
+        .rules-page li {
+            margin-bottom: 2vw;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #ff0000;
+        }
+        .game-over {
+            margin: 4vw;
+            padding: 2vw;
+            border: 2px solid #ccc;
+            font-size: 4vw;
+            text-align: center;
+        }
+        .game-over p {
+            margin-bottom: 4vw;
+        }
+        @media (max-width: 600px) {
+            tr, th, td {
+                font-size: 6vw;
+                height: 12vw;
+                width: 18vw;
+            }
+            button {
+                font-size: 5vw;
+                padding: 3vw 5vw;
+            }
+            .delete-btn {
+                font-size: 4vw;
+                padding: 1.5vw 3vw;
+            }
+            .save-game-btn {
+                font-size: 5vw;
+                padding: 3vw 5vw;
+            }
+            .continue-game-btn {
+                font-size: 4vw;
+                padding: 1.5vw 3vw;
+            }
+            .total {
+                font-size: 5.5vw;
+            }
+            .winner, .loser {
+                font-size: 5vw;
+            }
+            .player-management input {
+                font-size: 5vw;
+                width: 40vw;
+            }
+            .rules-page, .game-over {
+                font-size: 5vw;
+            }
+        }
+    </style>
+</head>
+<body onload="loadData(); updateView()">
+    <div id="app"></div>
+
+    <script>
+        let model = {
+            app: {
+                currentView: 'frontPage',
+                selectedPlayer: null,
+                newPlayerName: '',
+                renamePlayer: {},
+                selectedNumbers: [],
+                currentSum: 0,
+                clickedCells: []
+            },
+            inputs: {
+                playerOne: null,
+                playerTwo: null,
+            },
+            data: {
+                players: {
+                    C: { remaining: 501, history: [] },
+                    M: { remaining: 501, history: [] }
+                },
+                winningBoard: []
+            },
+        }
+
+        function saveData() {
+            localStorage.setItem('dartsScoreData', JSON.stringify(model.data));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('dartsScoreData');
+            if (savedData) {
+                model.data = JSON.parse(savedData);
+            }
+        }
+
+        function updateView() {
+            document.getElementById('app').innerHTML = /*html*/`
+            ${thePages()}
+            `;
+        }
+
+        function thePages() {
+            let theView = '';
+
+            switch(model.app.currentView) {
+                case 'frontPage':
+                    theView = thePlayers();
+                    break;
+                case 'score':
+                    theView = selectScore();
+                    break;
+                case 'winningBoard':
+                    theView = winningBoard();
+                    break;
+                case 'rules':
+                    theView = rules();
+                    break;
+                case 'gameOver':
+                    theView = gameOver();
+                    break;
+            }
+            return theView;
+        }
+
+        function thePlayers() {
+            let html = '<table>';
+            html += /*HTML*/`
+            <tr>
+                ${Object.keys(model.data.players).map(player => /*html*/`
+                    <th onclick="selectPlayer('${player}')">${player}</th>
+                `).join('')}
+            </tr>
+            `;
+            
+            // Add scores for each player
+            html += '<tr>';
+            Object.keys(model.data.players).forEach(player => {
+                html += '<td>';
+                if (model.data.players[player].history) {
+                    model.data.players[player].history.forEach((score, index) => {
+                        html += /*html*/`
+                        <div class="score-entry">
+                            ${score}
+                            <button class="delete-btn" onclick="deleteScore('${player}', ${index})">Slett</button>
+                        </div>
+                        `;
+                        if (index < model.data.players[player].history.length - 1) {
+                            html += '<hr>';
+                        }
+                    });
+                }
+                // Add remaining points for player
+                html += `<div class="total">${model.data.players[player].remaining}</div>`;
+                html += '</td>';
+            });
+            html += '</tr></table>';
+
+            // Player management section
+            html += /*html*/`
+            <div class="player-management">
+                <h3>Administrer spillere</h3>
+                <div>
+                    <input type="text" placeholder="Nytt spillernavn" oninput="model.app.newPlayerName = this.value" value="${model.app.newPlayerName}">
+                    <button onclick="addPlayer()">Legg til spiller</button>
+                </div>
+                <h4>Endre spillere</h4>
+                ${Object.keys(model.data.players).map(player => /*html*/`
+                    <div class="player-entry">
+                        <input type="text" placeholder="${player}" oninput="model.app.renamePlayer['${player}'] = this.value" value="${model.app.renamePlayer[player] || ''}">
+                        <button onclick="renamePlayer('${player}')">Gi nytt navn</button>
+                        <button class="delete-btn" onclick="deletePlayer('${player}')">Slett</button>
+                    </div>
+                `).join('')}
+            </div>
+            `;
+
+            // Add Save Game, View Winning Board, and Rules buttons
+            html += /*html*/`
+            <button class="save-game-btn" onclick="saveGame()">Lagre spill</button>
+            <button class="save-game-btn" onclick="model.app.currentView = 'winningBoard'; updateView()">Se vinnertavle</button>
+            <button class="save-game-btn" onclick="model.app.currentView = 'rules'; updateView()">Regler</button>
+            `;
+
+            return html;
+        }
+
+        function selectPlayer(player) {
+            model.app.selectedPlayer = player;
+            model.app.currentView = 'score';
+            model.app.selectedNumbers = [];
+            model.app.currentSum = 0;
+            model.app.clickedCells = [];
+            updateView();
+        }
+
+        function addPlayer() {
+            if (model.app.newPlayerName && !model.data.players[model.app.newPlayerName]) {
+                model.data.players[model.app.newPlayerName] = { remaining: 501, history: [] };
+                model.app.newPlayerName = '';
+                saveData();
+                updateView();
+            }
+        }
+
+        function renamePlayer(oldName) {
+            const newName = model.app.renamePlayer[oldName];
+            if (newName && newName !== oldName && !model.data.players[newName]) {
+                model.data.players[newName] = model.data.players[oldName];
+                delete model.data.players[oldName];
+                model.app.renamePlayer[oldName] = '';
+                saveData();
+                updateView();
+            }
+        }
+
+        function deletePlayer(player) {
+            if (Object.keys(model.data.players).length > 1) {
+                delete model.data.players[player];
+                delete model.app.renamePlayer[player];
+                saveData();
+                updateView();
+            }
+        }
+
+        function deleteScore(player, index) {
+            const score = model.data.players[player].history.splice(index, 1)[0];
+            model.data.players[player].remaining += score;
+            saveData();
+            updateView();
+        }
+
+        function saveGame() {
+            const scores = {};
+            const histories = {};
+            Object.keys(model.data.players).forEach(player => {
+                scores[player] = model.data.players[player].remaining;
+                histories[player] = model.data.players[player].history.slice();
+            });
+            const date = new Date().toLocaleDateString('nb-NO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            model.data.winningBoard.push({
+                date: date,
+                scores: scores,
+                histories: histories,
+                completed: false
+            });
+
+            saveData();
+            updateView();
+        }
+
+        function continueGame(index) {
+            const game = model.data.winningBoard[index];
+            Object.keys(game.scores).forEach(player => {
+                model.data.players[player] = {
+                    remaining: game.scores[player],
+                    history: game.histories[player].slice()
+                };
+            });
+            model.data.winningBoard.splice(index, 1);
+            model.app.currentView = 'frontPage';
+            saveData();
+            updateView();
+        }
+
+        function deleteSavedGame(index) {
+            model.data.winningBoard.splice(index, 1);
+            saveData();
+            updateView();
+        }
+
+        function winningBoard() {
+            let html = /*html*/`
+            <div class="winning-board">
+                <h2>Vinnertavle</h2>
+            `;
+            model.data.winningBoard.forEach((game, index) => {
+                // Find winner (lowest score)
+                const scores = game.scores;
+                const minScore = Math.min(...Object.values(scores));
+                html += /*html*/`
+                <div class="game-entry">
+                    <div>
+                        <p>Dato: ${game.date}</p>
+                        ${Object.keys(scores).map(player => {
+                            const playerClass = scores[player] === minScore ? 'winner' : 'loser';
+                            return /*html*/`<div class="${playerClass}">${player}: ${scores[player]}</div>`;
+                        }).join('')}
+                    </div>
+                    <div>
+                        ${!game.completed ? /*html*/`<button class="continue-game-btn" onclick="continueGame(${index})">Fortsett spill</button>` : ''}
+                        <button class="delete-btn" onclick="deleteSavedGame(${index})">Slett spill</button>
+                    </div>
+                </div>
+                `;
+            });
+            html += /*html*/`
+            <button class="save-game-btn" onclick="model.app.currentView = 'frontPage'; updateView()">Tilbake til spill</button>
+            </div>
+            `;
+            return html;
+        }
+
+        function rules() {
+            let html = /*html*/`
+            <div class="rules-page">
+                <h2>Regler for 501 Dart</h2>
+                <ul>
+                    <li>Hver spiller starter med 501 poeng.</li>
+                    <li>Spillere kaster tre piler per runde.</li>
+                    <li>Poengsummen for hvert kast trekkes fra spillerens gjeldende total.</li>
+                    <li>Gyldige poengområder inkluderer enkelt, dobbel og trippel segmenter, samt blink (50 for ytre, 100 for indre).</li>
+                    <li>For å vinne må en spiller nå nøyaktig 0 poeng, og den siste pilen må treffe en dobbel eller indre blink (100).</li>
+                    <li class="highlight">Hvis en spillers poengsum overskrider 501 poeng i en runde (bust), blir runden ugyldig, og poengsummen går tilbake til starten av runden.</li>
+                    <li>Spillet fortsetter til en spiller når nøyaktig 0 med et gyldig avsluttende kast.</li>
+                </ul>
+                <button class="save-game-btn" onclick="model.app.currentView = 'frontPage'; updateView()">Tilbake til spill</button>
+            </div>
+            `;
+            return html;
+        }
+
+        function gameOver() {
+            const winner = model.app.selectedPlayer;
+            const otherPlayers = Object.keys(model.data.players).filter(p => p !== winner);
+            const loser = otherPlayers.reduce((maxPlayer, player) => 
+                model.data.players[player].remaining > model.data.players[maxPlayer].remaining ? player : maxPlayer, 
+                otherPlayers[0]
+            );
+            // Automatically save game to winning board
+            const scores = {};
+            const histories = {};
+            Object.keys(model.data.players).forEach(player => {
+                scores[player] = model.data.players[player].remaining;
+                histories[player] = model.data.players[player].history.slice();
+            });
+            const date = new Date().toLocaleDateString('nb-NO', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+            model.data.winningBoard.push({
+                date: date,
+                scores: scores,
+                histories: histories,
+                completed: true
+            });
+            saveData();
+
+            let html = /*html*/`
+            <div class="game-over">
+                <h2>Spill slutt</h2>
+                <p>Spillet er over. Spiller ${winner} har vunnet og er jæskla fet! ${loser} er en fakkings loser!</p>
+                <button class="save-game-btn" onclick="startNewGame()">Start nytt spill</button>
+            </div>
+            `;
+            return html;
+        }
+
+        function startNewGame() {
+            Object.keys(model.data.players).forEach(player => {
+                model.data.players[player] = { remaining: 501, history: [] };
+            });
+            model.app.currentView = 'frontPage';
+            saveData();
+            updateView();
+        }
+
+        function selectScore() {
+            let html = '<table>';
+            html += /*HTML*/`
+                <tr>
+                    <td class="single">Enkel</td>
+                    <td class="double">Dobbel</td>
+                    <td class="triple">Trippel</td>
+                </tr>
+            `;
+            for(let i = 1; i <= 20; i++) {
+                const singleClicked = model.app.clickedCells.some(cell => cell.value === i && cell.type === 'single') ? 'clicked' : '';
+                const doubleClicked = model.app.clickedCells.some(cell => cell.value === i*2 && cell.type === 'double') ? 'clicked' : '';
+                const tripleClicked = model.app.clickedCells.some(cell => cell.value === i*3 && cell.type === 'triple') ? 'clicked' : '';
+                html += /*html*/`
+                    <tr>
+                        <td class="single ${singleClicked}" onclick="counter(${i}, 'single')">${i}</td>
+                        <td class="double ${doubleClicked}" onclick="counter(${i*2}, 'double')">${i*2}</td>
+                        <td class="triple ${tripleClicked}" onclick="counter(${i*3}, 'triple')">${i*3}</td>
+                    </tr>
+                `;
+            }
+            const bullseye50Clicked = model.app.clickedCells.some(cell => cell.value === 50 && cell.type === 'bullseye-50') ? 'clicked' : '';
+            const bullseye100Clicked = model.app.clickedCells.some(cell => cell.value === 100 && cell.type === 'bullseye-100') ? 'clicked' : '';
+            const miss0Clicked = model.app.clickedCells.some(cell => cell.value === 0 && cell.type === 'miss-0') ? 'clicked' : '';
+            html += /*html*/`
+            <tr>
+                <td class="miss-0 ${miss0Clicked}" onclick="counter(0, 'miss-0')">0</td>
+                <td class="bullseye-50 ${bullseye50Clicked}" onclick="counter(50, 'bullseye-50')">50</td>
+                <td class="bullseye-100 ${bullseye100Clicked}" onclick="counter(100, 'bullseye-100')">100</td>
+            </tr>
+            `;
+            
+            // Show selected numbers
+            if (model.app.selectedNumbers.length > 0) {
+                html += /*html*/`
+                <tr>
+                    <td colspan="3">Valgte: ${model.app.selectedNumbers.join(', ')} (Sum: ${model.app.currentSum})</td>
+                </tr>
+                `;
+            }
+
+            html += '</table>';
+
+            // Show confirmation dialog after 3 numbers
+            if (model.app.selectedNumbers.length === 3) {
+                html += /*html*/`
+                <div class="confirmation">
+                    <p>Sum: ${model.app.currentSum}</p>
+                    <button onclick="confirmScore()">OK</button>
+                    <button onclick="resetSelection()">Avbryt</button>
+                </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function counter(tall, type) {
+            if (model.app.selectedNumbers.length < 3) {
+                model.app.selectedNumbers.push(tall);
+                model.app.currentSum += tall;
+                model.app.clickedCells.push({ value: tall, type: type });
+                updateView();
+            }
+        }
+
+        function confirmScore() {
+            const player = model.app.selectedPlayer;
+            const newScore = model.data.players[player].remaining - model.app.currentSum;
+            if (newScore >= 0) {
+                model.data.players[player].remaining = newScore;
+                model.data.players[player].history.push(model.app.currentSum);
+                if (newScore === 0) {
+                    model.app.currentView = 'gameOver';
+                } else {
+                    model.app.currentView = 'frontPage';
+                }
+            } else {
+                model.data.players[player].remaining = 501;
+                model.data.players[player].history = [];
+                model.app.currentView = 'frontPage';
+            }
+            model.app.selectedNumbers = [];
+            model.app.currentSum = 0;
+            model.app.clickedCells = [];
+            saveData();
+            updateView();
+        }
+
+        function resetSelection() {
+            model.app.selectedNumbers = [];
+            model.app.currentSum = 0;
+            model.app.clickedCells = [];
+            updateView();
+        }
+    </script>
+</body>
+</html>
