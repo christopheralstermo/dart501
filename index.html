@@ -62,6 +62,16 @@
             border-radius: 5px;
             touch-action: manipulation;
         }
+        button.back-btn {
+            font-size: 4vw;
+            margin: 4vw auto;
+            padding: 2vw 4vw;
+            display: block;
+            background-color: #d3d3d3;
+            border: 2px solid #535353;
+            border-radius: 5px;
+            cursor: pointer;
+        }
         hr {
             border: 1px solid black;
             margin: 1vw 0;
@@ -614,6 +624,7 @@
                 </tr>
                 `;
             }
+            html += `<button class="back-btn" onclick="model.app.currentView = 'frontPage'; updateView();">Tilbake</button>`;
 
             html += '</table>';
 
@@ -632,13 +643,25 @@
         }
 
         function counter(tall, type) {
-            if (model.app.selectedNumbers.length < 3) {
-                model.app.selectedNumbers.push(tall);
-                model.app.currentSum += tall;
-                model.app.clickedCells.push({ value: tall, type: type });
-                updateView();
+    if (model.app.selectedNumbers.length < 3) {
+        const index = model.app.selectedNumbers.indexOf(tall);
+        if (index === -1) {
+            // Talet er ikke valgt tidligere, legg det til
+            model.app.selectedNumbers.push(tall);
+            model.app.currentSum += tall;
+            model.app.clickedCells.push({ value: tall, type: type });
+        } else {
+            // Talet er allerede valgt, fjern det
+            model.app.selectedNumbers.splice(index, 1);
+            model.app.currentSum -= tall;
+            const cellIndex = model.app.clickedCells.findIndex(cell => cell.value === tall && cell.type === type);
+            if (cellIndex !== -1) {
+                model.app.clickedCells.splice(cellIndex, 1);
             }
         }
+        updateView();
+    }
+}
 
         function confirmScore() {
             const player = model.app.selectedPlayer;
